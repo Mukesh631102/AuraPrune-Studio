@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/dashboard.html"
+      "destination": "/index.html"
     }
   ],
   "framework": null

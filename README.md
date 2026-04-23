@@ -45,7 +45,7 @@ python experiments.py
 ```
 
 ### 3. Launch Dashboard
-Open `dashboard.html` in your browser to view the live 3D network architecture and performance telemetry.
+Open `index.html` in your browser to view the live 3D network architecture and performance telemetry.
 
 ### 4. Interactive Development
 Generate and run the project via the provided Jupyter Notebook builder:
