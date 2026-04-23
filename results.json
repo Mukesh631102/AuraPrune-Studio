@@ -16,5 +16,23 @@
         "accuracy": 53.35,
         "sparsity_percentage": 0.0,
         "lambda_value": 0.0
+    },
+    {
+        "epoch": 1,
+        "accuracy": 48.05,
+        "sparsity_percentage": 0.0,
+        "lambda_value": 0.0
+    },
+    {
+        "epoch": 2,
+        "accuracy": 51.99,
+        "sparsity_percentage": 0.0,
+        "lambda_value": 0.0
+    },
+    {
+        "epoch": 3,
+        "accuracy": 53.45,
+        "sparsity_percentage": 0.0,
+        "lambda_value": 0.0
     }
 ]
