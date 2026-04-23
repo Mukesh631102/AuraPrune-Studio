@@ -4,5 +4,17 @@
         "accuracy": 49.5,
         "sparsity_percentage": 0.0,
         "lambda_value": 0.0
+    },
+    {
+        "epoch": 2,
+        "accuracy": 51.58,
+        "sparsity_percentage": 0.0,
+        "lambda_value": 0.0
+    },
+    {
+        "epoch": 3,
+        "accuracy": 53.35,
+        "sparsity_percentage": 0.0,
+        "lambda_value": 0.0
     }
 ]
