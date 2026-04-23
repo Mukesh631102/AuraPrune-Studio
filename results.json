@@ -1,0 +1,8 @@
+[
+    {
+        "epoch": 1,
+        "accuracy": 49.5,
+        "sparsity_percentage": 0.0,
+        "lambda_value": 0.0
+    }
+]

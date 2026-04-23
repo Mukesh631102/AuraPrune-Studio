@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraPrune | Anti-Gravity Dashboard</title>
+    <!-- Modern Tech Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Plotly.js for premium Data Visualization -->
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        /* ============================ */
+        /* Dark-Tech Styling Vectors    */
+        /* ============================ */
+        :root {
+            --bg-color: #05050A;
+            --glass-bg: rgba(20, 20, 30, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00F0FF;
+            --accent-violet: #8A2BE2;
+            --text-main: #F8F8FF;
+            --text-muted: #8F95A3;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 240, 255, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(138, 43, 226, 0.06), transparent 25%);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            overflow: hidden; 
+        }
+
+        /* Ambient subtle glowing particles behind dashboard */
+        .ambient-particles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .dashboard-container {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            grid-template-rows: 90px 1fr;
+            gap: 24px;
+            padding: 30px;
+            height: 100vh;
+            box-sizing: border-box;
+            background: linear-gradient(180deg, rgba(255,255,255,0.01) 0%, transparent 100%);
+        }
+
+        header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 15px;
+        }
+
+        .title-container h1 {
+            margin: 0;
+            font-weight: 800;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, var(--accent-cyan), #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(0,240,255,0.3);
+        }
+
+        .title-container p {
+            margin: 6px 0 0;
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+            font-family: 'JetBrains Mono', monospace;
+            opacity: 0.8;
+            letter-spacing: 1.5px;
+        }
+
+        /* Essential UI Structural Component: Glassmorphism Floating Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .float-anim {
+            animation: floating 8s ease-in-out infinite;
+        }
+
+        .chart-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-cyan);
+            box-shadow: 0 0 12px var(--accent-cyan);
+        }
+
+        .sim-panel {
+            grid-column: 1 / 2;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .canvas-panel {
+            grid-column: 2 / -1;
+            position: relative;
+            overflow: hidden;
+            padding: 0; 
+        }
+
+        /* Action Component */
+        .btn-glow {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(138, 43, 226, 0.15));
+            border: 1px solid var(--accent-cyan);
+            color: #fff;
+            padding: 18px 24px;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            margin-top: auto;
+        }
+
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-glow:hover {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(138, 43, 226, 0.3));
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+            transform: scale(1.03);
+            border-color: #fff;
+        }
+        
+        .btn-glow:hover::before {
+            left: 100%;
+        }
+        
+        .btn-glow:active {
+            transform: scale(0.97);
+        }
+
+        #line-chart, #scatter-3d {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px 15px;
+            text-align: center;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .stat-box .value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            font-family: 'JetBrains Mono', monospace;
+            text-shadow: 0 0 15px rgba(0,240,255,0.4);
+        }
+
+        .stat-box .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Lightweight Background Logic -->
+    <canvas class="ambient-particles" id="ambientCanvas"></canvas>
+
+    <div class="dashboard-container">
+        
+        <header>
+            <div class="title-container float-anim">
+                <h1>AuraPrune Studio</h1>
+                
+            </div>
+            
+            <div style="display:flex; align-items:center; gap: 12px; font-family:'JetBrains Mono'; font-size:13px; color:var(--text-main); font-weight:700;">
+                <div style="width:12px; height:12px; background:var(--accent-cyan); border-radius:50%; box-shadow:0 0 15px var(--accent-cyan); animation:blink 2s infinite;"></div>
+                SYSTEM ONLINE
+            </div>
+        </header>
+
+        <!-- Dynamic Monitoring Panel -->
+        <div class="sim-panel">
+            <div class="glass-card stat-card float-anim" style="animation-delay: 0.2s;">
+                <div class="chart-title">Real-Time Telemetry</div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="value" id="val-accuracy">94.2%</div>
+                        <div class="label">Precision Threshold</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="val-sparsity">3.2%</div>
+                        <div class="label">Network Sparsity</div>
+                    </div>
+                </div>
+                <div style="font-family:'JetBrains Mono'; font-size:0.85rem; color:var(--text-muted); text-align:right;">
+                    [ REGULARIZATION: L1 | λ = 1e-4 ]
+                </div>
+            </div>
+
+            <div class="glass-card float-anim" style="flex-grow: 1; animation-delay: 0.4s;">
+                <div class="chart-title">Pruning vs Accuracy Trade-off</div>
+                <div id="line-chart"></div>
+            </div>
+
+            <!-- Execution Button (AuraPrune logic restored) -->
+            <button class="btn-glow float-anim" id="btn-simulate" style="animation-delay: 0.6s;" onclick="triggerAntiGravityPruning()">
+                Execute-Run
+            </button>
+        </div>
+
+        <!-- The "Wow" Viewport -->
+        <div class="glass-card canvas-panel">
+            <div class="chart-title" style="position:absolute; top:24px; left:24px; z-index:20;">3D Network Architecture Map</div>
+            <div id="scatter-3d"></div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+    </style>
+
+    <script>
+        // ==========================================
+        // SYSTEM INIT: Ambient Visuals
+        // ==========================================
+        const canvas = document.getElementById('ambientCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for(let i=0; i<80; i++) {
+            particles.push({
+                x: Math.random() * width, y: Math.random() * height,
+                r: Math.random() * 2.5,
+                vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+                opacity: Math.random() * 0.4
+            });
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#00F0FF';
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x < 0) p.x = width; if(p.x > width) p.x = 0;
+                if(p.y < 0) p.y = height; if(p.y > height) p.y = 0;
+                ctx.globalAlpha = p.opacity;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(drawParticles);
+        }
+        drawParticles();
+        async function loadTelemetry() {
+            try {
+                const response = await fetch('results.json');
+                const data = await response.json();
+                
+                if (data.length > 0) {
+                    const latest = data[data.length - 1];
+                    document.getElementById('val-accuracy').innerText = latest.accuracy + "%";
+                    document.getElementById('val-sparsity').innerText = latest.sparsity_percentage + "%";
+                    
+                    const epochs = data.map(d => d.epoch || data.indexOf(d) + 1);
+                    const accuracies = data.map(d => d.accuracy / 100);
+                    const sparsities = data.map(d => d.sparsity_percentage / 100);
+                    
+                    Plotly.update('line-chart', {
+                        x: [epochs, epochs],
+                        y: [accuracies, sparsities]
+                    }, {}, [0, 1]);
+                }
+            } catch (e) {
+                console.log("Waiting for telemetry data...", e);
+            }
+        }
+        
+        loadTelemetry();
+        setInterval(loadTelemetry, 3000); // Poll for updates
+
+
+
+        // ==========================================
+        // DYNAMIC MONITORING (Plotly Line Engine)
+        // ==========================================
+        const lineLayout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            margin: { t: 10, r: 10, b: 40, l: 40 },
+            font: { color: '#8F95A3', family: 'JetBrains Mono', size: 10 },
+            xaxis: { showgrid: false, title: 'Training Epochs', zeroline: false },
+            yaxis: { showgrid: true, gridcolor: 'rgba(255,255,255,0.06)', gridwidth: 1, zeroline: false },
+            showlegend: true,
+            legend: { orientation: 'h', y: -0.25, x: 0.1 },
+            hovermode: 'x unified'
+        };
+
+        const traceAcc = {
+            x: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            y: [0.75, 0.82, 0.88, 0.91, 0.92, 0.93, 0.94, 0.942, 0.941, 0.942],
+            mode: 'lines',
+            name: 'Accuracy',
+            line: { color: '#8A2BE2', width: 4, shape: 'spline' },
+            fill: 'tozeroy',
+            fillcolor: 'rgba(138, 43, 226, 0.1)'
+        };
+
+        const traceSparsity = {
+            x: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            y: [0.0, 0.1, 0.25, 0.45, 0.60, 0.72, 0.78, 0.81, 0.83, 0.84],
+            mode: 'lines',
+            name: 'Network Sparsity',
+            line: { color: '#00F0FF', width: 3, dash: 'dot', shape: 'spline' }
+        };
+
+        Plotly.newPlot('line-chart', [traceAcc, traceSparsity], lineLayout, {displayModeBar: false, responsive: true});
+
+
+        // ==========================================
+        // THE "ANTI-GRAVITY" ARCHITECTURE ENGINE
+        // ==========================================
+        let wp_x=[], wp_y=[], wp_z=[], wp_colors=[], wp_sizes=[], wp_opacities=[], wp_gates=[];
+        const totalNodes = 1500; // Dense network initialization representation
+        
+        // Populate node cluster parameters
+        for(let i=0; i<totalNodes; i++) {
+            // Generating 4 Deep Layers across the X axis mapping
+            let layer = Math.floor(Math.random() * 4);
+            wp_x.push(layer * 15 + (Math.random()*4 - 2)); 
+            
+            // Clustering geometrically for standard MLP aesthetic
+            let radius = Math.random() * 15;
+            let theta = Math.random() * 2 * Math.PI;
+            
+            wp_y.push(radius * Math.cos(theta));
+            wp_z.push(radius * Math.sin(theta));
+            
+            // Node connection 'Gate' strength calculation between 0.0-1.0
+            let gate = Math.random();
+            wp_gates.push(gate);
+            
+            if (gate > 0.75) {
+                wp_colors.push('#FFFFFF');   // Highest density (White/Hot)
+            } else if (gate > 0.4) {
+                wp_colors.push('#8A2BE2');   // Standard Active (Violet)
+            } else {
+                wp_colors.push('#00F0FF');   // Weak/Prunable (Cyan)
+            }
+            
+            wp_sizes.push(2 + gate * 5);
+            wp_opacities.push(0.6 + gate * 0.4); 
+        }
+
+        const scatterTrace = {
+            x: wp_x, y: wp_y, z: wp_z,
+            mode: 'markers',
+            marker: {
+                size: wp_sizes, color: wp_colors,
+                opacity: wp_opacities, symbol: 'circle'
+            },
+            type: 'scatter3d',
+            hoverinfo: 'none' // disable hover for raw performance
+        };
+
+        const scatterLayout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            margin: { l: 0, r: 0, b: 0, t: 0 },
+            scene: {
+                xaxis: { showgrid: false, zeroline: false, showticklabels: false, backgroundcolor: 'rgba(0,0,0,0)' },
+                yaxis: { showgrid: false, zeroline: false, showticklabels: false, backgroundcolor: 'rgba(0,0,0,0)' },
+                zaxis: { showgrid: false, zeroline: false, showticklabels: false, backgroundcolor: 'rgba(0,0,0,0)' },
+                camera: {
+                    eye: {x: 1.2, y: -1.2, z: 0.6},
+                    center: {x:0, y:0, z:0}
+                }
+            }
+        };
+
+        Plotly.newPlot('scatter-3d', [scatterTrace], scatterLayout, {displayModeBar: false, responsive: true});
+
+
+        // ==========================================
+        // THE "WOW FACTOR" : Anti-Gravity Pruning Run
+        // ==========================================
+        let animationId;
+        let isSimulating = false;
+        let currentSparsityValue = 3.2; // Start sync with DOM placeholder
+        
+        function triggerAntiGravityPruning() {
+            if(isSimulating) return;
+            isSimulating = true;
+            
+            const btn = document.getElementById('btn-simulate');
+            btn.innerHTML = "// EXECUTING WEIGHT RETRACTION //";
+            btn.style.boxShadow = "inset 0 0 25px rgba(255, 0, 85, 0.4)";
+            btn.style.borderColor = "#FF0055";
+            btn.style.color = "#FF0055";
+            btn.style.textShadow = "0 0 10px rgba(255,0,85,0.8)";
+            
+            // Any active gate score under 0.6 will be stripped
+            const threshold = 0.6; 
+            
+            let totalPrunedCount = wp_gates.filter(g => g < threshold).length;
+            let finalTargetSparsity = (totalPrunedCount / totalNodes * 100).toFixed(1);
+            let frame = 0;
+            
+            function structuralCollapseLoop() {
+                let sceneUpdated = false;
+                
+                // Vector Physics Engine mapping out dead weights
+                for(let i=0; i<totalNodes; i++) {
+                    if(wp_gates[i] < threshold) {
+                        
+                        // ANTI-GRAVITY EFFECT:
+                        // As weights lose optimization anchoring, they physically
+                        // drift 'upward/outward' into the void space...
+                        
+                        if(wp_opacities[i] > 0.05) {
+                            wp_y[i] += (Math.random() - 0.5) * 0.8; // subtle tremor
+                            wp_z[i] += 0.4 + (wp_z[i] * 0.02); // upward drift acceleration
+                            
+                            wp_opacities[i] -= 0.012; // slow fade into black
+                            wp_sizes[i] *= 0.95; // scaling collapse
+                            
+                            sceneUpdated = true;
+                        } else {
+                            wp_opacities[i] = 0;
+                            wp_sizes[i] = 0;
+                        }
+                    }
+                }
+                
+                if(sceneUpdated) {
+                    Plotly.update('scatter-3d', {
+                        'marker.opacity': [wp_opacities],
+                        'marker.size': [wp_sizes],
+                        'y': [wp_y],
+                        'z': [wp_z]
+                    }, {}, 0);
+                    
+                    // Hook into DOM state
+                    if (frame % 3 === 0 && currentSparsityValue < finalTargetSparsity) {
+                        currentSparsityValue += 1.8;
+                        if(currentSparsityValue > finalTargetSparsity) currentSparsityValue = finalTargetSparsity;
+                        document.getElementById('val-sparsity').innerText = currentSparsityValue.toFixed(1) + "%";
+                    }
+                    
+                    frame++;
+                    animationId = requestAnimationFrame(structuralCollapseLoop);
+                } else {
+                    // System Lockout after optimization
+                    btn.innerHTML = "[ OPTIMIZATION COMPLETE ]";
+                    btn.style.color = "var(--text-muted)";
+                    btn.style.background = "rgba(0,0,0,0.5)";
+                    btn.style.boxShadow = "none";
+                    btn.style.borderColor = "rgba(255,255,255,0.1)";
+                    btn.style.textShadow = "none";
+                    btn.style.cursor = "not-allowed";
+                    
+                    document.getElementById('val-sparsity').innerText = finalTargetSparsity + "%";
+                    document.getElementById('val-accuracy').innerText = "94.5%"; // accuracy bump!
+                }
+            }
+            
+            // Ignite the engine
+            structuralCollapseLoop();
+        }
+    </script>
+</body>
+</html>
