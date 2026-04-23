@@ -3,6 +3,8 @@
 ## Executive Summary
 This report details the implementation and results of the **AuraPrune** project, a self-pruning neural network architecture designed for CIFAR-10. The system utilizes learnable sigmoid gates and L1 regularization to autonomously retract redundant weights, optimizing for both inference efficiency and precision.
 
+**🔗 Live Demo:** [aura-prune-studio.vercel.app](https://aura-prune-studio-nk9v.vercel.app/)
+
 ## Mathematical Intuition: The L1 Sigmoid Gate
 The fundamental mechanism of AuraPrune is the **L1-regularized sigmoid gate**. For each weight **w**, we learn a corresponding gate score **g**. The active weight **w'** is defined as:
 

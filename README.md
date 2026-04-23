@@ -2,6 +2,8 @@
 
 AuraPrune is a high-performance **Self-Pruning Neural Network** system designed for the CIFAR-10 dataset. It utilizes learnable sigmoid gates and an L1 regularization framework to autonomously identify and retract redundant weights during the training process, achieving a state-of-the-art balance between precision and architectural sparsity.
 
+**🔗 Live Dashboard:** [aura-prune-studio.vercel.app](https://aura-prune-studio-nk9v.vercel.app/)
+
 ![Dashboard Preview](assets/gate_distribution.png)
 
 ## 🚀 Key Features
