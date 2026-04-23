@@ -1,7 +1,0 @@
-torchvision
-fastapi
-uvicorn
-pydantic
-Pillow
-matplotlib
-numpy

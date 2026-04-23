@@ -1,11 +1,14 @@
 {
   "version": 2,
   "name": "auraprune-studio",
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/",
       "destination": "/dashboard.html"
     }
   ],
-  "cleanUrls": true
+  "github": {
+    "silent": true
+  }
 }
