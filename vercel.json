@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "name": "auraprune-studio",
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/dashboard.html"
+    }
+  ],
+  "cleanUrls": true
+}
